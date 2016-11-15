@@ -1,0 +1,278 @@
+/* 公共层面 */
+/* 清除浮动 */
+.clearfix {
+    *zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+    display: table;
+    line-height: 0;
+    content: "";
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/* 组件层 */
+
+/* 页面层面 */
+html, body {
+    font-size: 16px;
+    overflow: hidden;
+}
+
+.left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    width: 60px;
+    height: 100vh;
+    background: #eee;
+    overflow: hidden;
+    border-right: 1px solid #ccc;
+}
+
+.component-menu {
+    text-align: center;
+    margin: 0 auto;
+    width: 50px;
+}
+
+.component-menu li {
+    padding: 10px 0;
+    border-bottom: 1px solid #a5a5a5;
+}
+
+.component-menu li a {
+    color: #696969;
+    text-decoration: none;
+}
+
+.component-menu li a:hover {
+    color: #000;
+}
+
+.setting {
+    position: absolute;
+    left: 0;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-setting {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    text-indent: -500px;
+    background: url("../../images/setting.png") no-repeat 0 0;
+}
+
+.middle {
+    margin: 0 260px 0 61px;
+    height: 100vh;
+}
+
+.canvas {
+    position: relative;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: url("../../images/bg.png") repeat;
+    overflow-y: auto;
+}
+
+.canvas .content {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    z-index: 1000;
+    width: 200px;
+    height: 50px;
+    background: red;
+}
+
+.right {
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 10;
+    width: 260px;
+    height: 100vh;
+    background: #eee;
+    overflow: hidden;
+    border-left: 1px solid #ccc;
+}
+
+.right .btn:hover {
+    cursor: pointer;
+}
+
+.operation {
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 11;
+    text-align: center;
+    width: 260px;
+    height: 65px;
+    line-height: 65px;
+    background: #eee;
+    border-bottom: 1px solid #a5a5a5;
+}
+
+.operation .btn {
+    margin: 0 10px;
+    padding: 5px 20px;
+    width: 76px;
+    height: 32px;
+}
+
+.attribute {
+    position: absolute;
+    top: 66px;
+    right: 0;
+    bottom: 0;
+    z-index: 11;
+    width: 100%;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    background: #fafafa;
+}
+
+.attribute .item {
+    padding: 10px 5px;
+}
+
+.item input {
+    margin: 0 5px 0 0;
+    width: 40%;
+    min-width: 70px;
+    font-size: 16px;
+    text-align: center;
+    color: #454545;
+    padding: 2px 0;
+}
+
+.item label {
+    margin: 0 5px 0 0;
+    width: 30%;
+    min-width: 70px;
+    display: inline-block;
+    text-align: right;
+}
+
+.item div {
+    text-align: left;
+    padding: 5px;
+}
+
+.item .title {
+    margin: 0 auto 5px;
+    padding: 0 0 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.item select {
+    width: 30%;
+    min-width: 105px;
+}
+
+.item .background-position, .item .background-image, .item .src {
+    width: 60%;
+    min-width: 120px;
+}
+
+.item.text label {
+    width: 40px;
+    min-width: 0;
+}
+
+.item textarea {
+    resize: none;
+    margin: 10px auto 0;
+    width: 95%;
+    min-width: 230px;
+    height: 100px;
+}
+
+input.self-adaption {
+    width: 20px;
+}
+
+input.file {
+    width: 70%;
+}
+
+.upload {
+    float: right;
+    font-size: 16px;
+    width: 56px;
+    height: 24px;
+}
+
+/* 组件 */
+.component .inner {
+    width: 100%;
+    height: 100%;
+}
+
+.component.focus {
+    box-shadow: 0 0 4px 4px #fff7c3;
+}
+
+.component-delete {
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    background: #e0e0e0;
+    border-radius: 20px;
+    height: 20px;
+    width: 20px;
+}
+
+.component-delete.hide {
+    display: none;
+}
+
+.component-delete::before, .component-delete::after {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 0;
+    width: 20px;
+    height: 1px;
+    background: #757575;
+    border-radius: 2px;
+}
+
+.component-delete::before {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.component-delete::after {
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+.component.state-hover {
+    box-shadow: 0 0 4px 4px blue;
+}
+
+.canvas.state-hover {
+    background-color: #6b6b6b;
+    opacity: .5;
+    -moz-opacity: .5;
+    -ms-opacity: .5;
+    opacity: .5;
+}

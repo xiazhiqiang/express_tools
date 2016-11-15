@@ -1,0 +1,109 @@
+extends  ../layout/base
+
+block content
+    link(rel="stylesheet" type="text/css" href="css/index/edit.css")
+    link(rel="stylesheet" type="text/css" media="screen" href="plugins/colorpicker/css/colorpicker.css")
+
+    div.header
+    div.left
+        ul.component-menu
+            li
+                a(href="javascript:;",data-item="block") 区块
+            li
+                a(href="javascript:;",data-item="text") 文本
+            li
+                a(href="javascript:;",data-item="image") 图片
+        div.setting
+            a.btn-setting(href="javascript:;") 设置
+    div.middle
+        div.canvas#canvas
+    div.right
+        div.operation
+            button.btn.save 保存
+            button.btn.export 导出
+        div.attribute
+            div.position.item
+                h3.title 位置（position）：
+                div
+                    label 水平适应:
+                    input.attr-item.self-adaption(type="checkbox",data-item="self-adaption")
+                div
+                    label 定位方式:
+                    select.attr-item.position-style(data-item="position")
+                        option(selected,value="static") 默认
+                        option(value="relative") 相对
+                        option(value="absolute") 绝对
+                div
+                    label 左偏移:
+                    input.attr-item.position-left(type="text",data-item="position-left",value="0")
+                    span 像素
+                div
+                    label 上偏移:
+                    input.attr-item.position-top(type="text",data-item="position-top",value="0")
+                    span 像素
+                div
+                    label 层次:
+                    input.attr-item.position-zIndex(type="text",data-item="position-zIndex",value="1000")
+            div.size.item
+                h3.title 尺寸（size）：
+                div
+                    label 宽度:
+                    input.attr-item.size-width(type="text",data-item="size-width",value="0")
+                    span 像素
+                div
+                    label 高度:
+                    input.attr-item.size-height(type="text",data-item="size-height",value="0")
+                    span 像素
+            div.border.item
+                h3.title 边框（border）：
+                div
+                    label 宽度:
+                    input.attr-item.border-width(type="text",data-item="border-width",value="1")
+                    span 像素
+                div
+                    label 样式:
+                    select.attr-item.border-style(data-item="border-style")
+                        option.solid(value="solid") ——————
+                        option.dotted(selected,value="dotted") ....................
+                        option.dashed(value="dashed") -------------
+                div
+                    label 颜色:
+                    input.attr-item.color-picker.border-color(type="text",data-item="border-color",value="#cccccc")
+            div.background.item
+                h3.title 背景（background）：
+                div
+                    label 定位:
+                    input.attr-item.background-position(type="text",data-item="background-position")
+                div
+                    label 图片:
+                    input.attr-item.background-image(type="text",data-item="background-image")
+                    span
+                div
+                    label 颜色:
+                    input.attr-item.color-picker.background-color(type="text",data-item="background-color",value="#408080")
+                div
+                    label 重复:
+                    select.attr-item.background-repeat(data-item="background-repeat")
+                        option(value="") no-repeat
+                        option(value="no-repeat") no-repeat
+                        option(value="repeat") repeat
+                        option(value="repeat-x") repeat-x
+                        option(value="repeat-y") repeat-y
+                div
+                    label 大小:
+                    input.attr-item.background-size(data-item="background-size",type="text")
+            div.image.item
+                h3.title 图片（image）：
+                div
+                    label 路径:
+                    input.src(type="text")
+                div
+                    input.file(type="file",name="file")
+                    button.btn.upload 上传
+            div.text.item
+                h3.title 文本（text）：
+                div
+                    label 内容:
+                    textarea
+
+    script(src="js/require.js" defer async="true" data-main="js/index/edit.js")
