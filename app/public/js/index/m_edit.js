@@ -13,6 +13,8 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
         this.width = option.width == undefined ? 0 : option.width;
         this.height = option.height == undefined ? 0 : option.height;
         this.zIndex = option.zIndex == undefined ? 1000 : option.zIndex;
+        this.margin = option.margin == undefined ? 0 : option.margin;
+        this.padding = option.padding == undefined ? 0 : option.padding;
     }
 
     Base.prototype.render = function (parent, dom) {
@@ -21,10 +23,19 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
     };
 
     /**
-     * TODO 未完
+     * 生成css的属性
+     * @param name
+     * @param attr
+     * @param value_prefix
+     * @param value_suffix
+     * @returns {string}
      */
-    Base.prototype.createCss = function () {
+    Base.prototype.createCssAttr = function (name, attr, value_prefix, value_suffix) {
+        attr = attr || name;
+        value_prefix = value_prefix || '';
+        value_suffix = value_suffix || '';
 
+        return this[name] != undefined && this[name] != '' ? [attr, ':', value_prefix, this[name], value_suffix, ';'].join('') : '';
     };
 
     /**
@@ -35,7 +46,7 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
     function Block(option) {
         Base.call(this, option);
 
-        this.componentType = this.constructor.name == 'Block' ? this.constructor.name : 'Block';
+        // this.componentType = this.constructor.name == 'Block' ? this.constructor.name : 'Block';
 
         this.borderWidth = option.borderWidth == undefined ? '1px' : option.borderWidth;
         this.borderStyle = option.borderStyle == undefined ? 'solid' : option.borderStyle;
@@ -66,9 +77,11 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
                 position: that.position,
                 left: that.left,
                 top: that.top,
+                'z-index': that.zIndex,
                 width: that.width,
                 height: that.height,
-                'z-index': that.zIndex,
+                margin: that.margin,
+                padding: that.padding,
                 background: [that.backgroundColor, 'url(' + that.backgroundImage + ')', that.backgroundPosition, that.backgroundRepeat, that.backgroundSize].join(' '),
                 border: [that.borderWidth, that.borderStyle, that.borderColor].join(' '),
             }, data.css || {});
@@ -133,7 +146,6 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
             .appendTo(parent);
 
         // 添加到dom树
-        // addDom(this);
         console.log(addDomTree(this));
 
         return this;
@@ -141,7 +153,6 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
 
     /**
      * 重新生成组件dom用于导出
-     * todo 需要完善
      * @returns {{html: (*|jQuery|HTMLElement), css: string}}
      */
     Block.prototype.reform = function () {
@@ -149,6 +160,35 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
             html: $('<div id="' + this.id + '"></div>'),
             css: this.createCss(),
         };
+    };
+
+    /**
+     * 生成css
+     * @returns {string}
+     */
+    Block.prototype.createCss = function () {
+        var css = [
+            '#' + this.id + '{',
+            this.createCssAttr('position'),
+            this.createCssAttr('left'),
+            this.createCssAttr('top'),
+            this.createCssAttr('zIndex', 'z-index'),
+            this.createCssAttr('width'),
+            this.createCssAttr('height'),
+            this.createCssAttr('margin'),
+            this.createCssAttr('padding'),
+            this.createCssAttr('borderWidth', 'border-width'),
+            this.createCssAttr('borderStyle', 'border-style'),
+            this.createCssAttr('borderColor', 'border-color'),
+            this.createCssAttr('backgroundPosition', 'background-position'),
+            this.createCssAttr('backgroundImage', 'background-image', 'url(', ')'),
+            this.createCssAttr('backgroundColor', 'background-color'),
+            this.createCssAttr('backgroundRepeat', 'background-repeat'),
+            this.createCssAttr('backgroundSize', 'background-size'),
+            '}',
+        ];
+
+        return css.join('');
     };
 
     /**
@@ -192,11 +232,13 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
                     component = new Block({
                         id: Helper.randomChar(6),
                         position: data.position || 'absolute',
-                        width: data.width || 200,
-                        height: data.height || 100,
-                        left: data.left != undefined ? data.left : 0,
-                        top: data.top != undefined ? data.top : 0,
+                        width: data.width || '200px',
+                        height: data.height || '100px',
+                        left: data.left != undefined ? data.left : '0px',
+                        top: data.top != undefined ? data.top : '0px',
                         zIndex: data.zIndex || 1001,
+                        margin: data.margin != undefined ? data.margin : '0px',
+                        padding: data.padding != undefined ? data.padding : '0px',
                         borderWidth: data.borderWidth || '1px',
                         borderStyle: data.borderStyle || 'solid',
                         borderColor: data.borderColor || '#ccc',
@@ -242,31 +284,63 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
         current: '',
     };
 
+    var _htmlFrame = function (html, css) {
+        html = html || '';
+        css = css || '';
+
+        return [
+            '<!DOCTYPE html><html>',
+            '<head>',
+            '<meta charset="utf-8">',
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
+            '<title>Demo</title>',
+            css ? '<style type="text/css">' + css + '</style>' : css,
+            '</head><body>',
+            html,
+            '</body></html>',
+        ].join('');
+    };
+
     /**
-     * 导出html代码
-     * todo 需要完善css，html
+     * 导出html,css代码
+     * @returns {{html: (string|*|string|string|string|string), css: string}}
      */
     var exportCode = function () {
-        var _reformTree = {};
+        var _reformTree = {_css_: []};
+
+        // 前序遍历所有节点生成子树和css
         _preOrder('_root_', _reformTree, function (id, obj) {
-            var parent = _domTree.dom[id].parent;
-            if (parent == -1) {
-                obj['_root_'] = $('<div id="canvas"></div>');
-            } else if (parent === '_root_') {
-                obj[id] = _domTree.dom[id].data.reform().html;
-            } else {
-                obj[parent] = obj[parent].append(_domTree.dom[id].data.reform().html);
+            var parent = _domTree.dom[id].parent,
+                reform = parent != -1 ? _domTree.dom[id].data.reform() : {html: $('<div id="canvas"></div>'), css: ''};
+
+            if (parent == -1) {// 画布根节点
+                obj._root_ = reform.html;
+            } else if (parent === '_root_') {// 根节点下的子节点
+                obj[id] = reform.html;
+            } else {// 子节点下面的子节点
+                obj[parent] = obj[parent].append(reform.html);
             }
+
+            // 生成css
+            obj._css_.push(reform.css);
         });
 
+        // 遍历根节点下的子树生成html
         var firstChild = _domTree.dom._root_.firstChild;
         while (firstChild !== null) {
-            _reformTree['_root_'].append(_reformTree[firstChild.child]);
+            _reformTree._root_.append(_reformTree[firstChild.child]);
             delete _reformTree[firstChild.child];
+
             firstChild = firstChild.next;
         }
 
-        console.log(_reformTree['_root_'][0].innerHTML);
+        console.log(_reformTree._root_[0]);
+
+        return {
+            html: _reformTree._root_[0].innerHTML,
+            css: _reformTree._css_.join(''),
+            file: _htmlFrame(_reformTree._root_[0].innerHTML, _reformTree._css_.join('')),
+        };
     };
 
     /**

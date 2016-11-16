@@ -149,8 +149,8 @@ html, body {
 
 .item input {
     margin: 0 5px 0 0;
-    width: 40%;
-    min-width: 70px;
+    width: 50%;
+    min-width: 120px;
     font-size: 16px;
     text-align: center;
     color: #454545;
@@ -177,8 +177,8 @@ html, body {
 }
 
 .item select {
-    width: 30%;
-    min-width: 105px;
+    width: 50%;
+    min-width: 120px;
 }
 
 .item .background-position, .item .background-image, .item .src {
@@ -225,7 +225,8 @@ input.file {
 }
 
 .component-delete {
-    position: absolute;
+    position: relative;
+    float: right;
     right: -10px;
     top: -10px;
     background: #e0e0e0;

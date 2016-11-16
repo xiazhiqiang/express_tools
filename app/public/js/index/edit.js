@@ -23,29 +23,35 @@ var callback = function () {
                 domData = Model.getCurDom().data;
 
             switch ($(this).data('item')) {
+                // 自适应特殊处理
+                case 'self-adaption':
+                    domData.margin = dom.style.margin;
+                    $(this)[0].checked = dom.style.margin != '0px';
+                    break;
+
                 // 基础属性
                 case 'position':
                     domData.position = value = dom.style.position;
                     break;
                 case 'position-left':
-                    domData.left = value = dom.style.left.slice(0, -2);
+                    domData.left = value = dom.style.left;
                     break;
                 case 'position-top':
-                    domData.top = value = dom.style.top.slice(0, -2);
+                    domData.top = value = dom.style.top;
                     break;
                 case 'position-zIndex':
                     domData.zIndex = value = dom.style.zIndex;
                     break;
                 case 'size-width':
-                    domData.width = value = dom.style.width.slice(0, -2);
+                    domData.width = value = dom.style.width;
                     break;
                 case 'size-height':
-                    domData.height = value = dom.style.height.slice(0, -2);
+                    domData.height = value = dom.style.height;
                     break;
 
                 // 边框属性
                 case 'border-width':
-                    domData.borderWidth = value = dom.style.borderWidth.slice(0, -2);
+                    domData.borderWidth = value = dom.style.borderWidth;
                     break;
                 case 'border-style':
                     domData.borderStyle = value = dom.style.borderStyle;
@@ -99,7 +105,7 @@ var callback = function () {
             switch (element.data('item')) {
                 // 自适应特殊处理
                 case 'self-adaption':
-                    domData.margin = css.margin = element[0].checked ? '0 auto' : '';
+                    domData.margin = css.margin = element[0].checked ? '0 auto' : '0';
                     break;
 
                 // 基础属性
@@ -107,29 +113,24 @@ var callback = function () {
                     domData.position = css.position = value;
                     break;
                 case 'position-left':
-                    domData.left = value;
-                    css.left = value + 'px';
+                    domData.left = css.left = value;
                     break;
                 case 'position-top':
-                    domData.top = value;
-                    css.top = value + 'px';
+                    domData.top = css.top = value;
                     break;
                 case 'position-zIndex':
                     domData.zIndex = css['z-index'] = value;
                     break;
                 case 'size-width':
-                    domData.width = value;
-                    css.width = value + 'px';
+                    domData.width = css.width = value;
                     break;
                 case 'size-height':
-                    domData.height = value;
-                    css.height = value + 'px';
+                    domData.height = css.height = value;
                     break;
 
                 // 边框属性
                 case 'border-width':
-                    domData.borderWidth = value;
-                    css['border-width'] = value + 'px';
+                    domData.borderWidth = css['border-width'] = value;
                     break;
                 case 'border-style':
                     domData.borderStyle = css['border-style'] = value;
@@ -212,9 +213,18 @@ var callback = function () {
                         return false;
                     }
 
-                    if ($(this).data('item') == 'self-adaption' && $(this)[0].checked) {
-                        $('.position-left').val(0).trigger('change');
-                        $('.position-top').val(0).trigger('change');
+                    // 调整属性区域时联动改变其他属性区域的值
+                    switch ($(this).data('item')) {
+                        case 'position':
+                            $('.position-left').val('0px').trigger('change');
+                            $('.position-top').val('0px').trigger('change');
+                            break;
+                        case 'self-adaption':
+                            if ($(this)[0].checked) {
+                                $('.position-left').val('0px').trigger('change');
+                                $('.position-top').val('0px').trigger('change');
+                            }
+                            break;
                     }
 
                     // 属性区改变同时作用于当前选中元素在视图区的显示
@@ -258,7 +268,14 @@ var callback = function () {
             $('.export').on('click', function (event) {
                 event.stopPropagation();
 
-                Model.exportCode();
+                var code = Model.exportCode();
+                console.log(code);
+
+                var form = $('<form method="post" action="/export"></form>')
+                    .append($('<input type="hidden" name="html">').val(code.html))
+                    .append($('<input type="hidden" name="css">').val(code.css))
+                    .append($('<input type="hidden" name="file">').val(code.file));
+                form.submit();
             });
 
             /**
