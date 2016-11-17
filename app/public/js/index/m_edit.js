@@ -46,8 +46,6 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
     function Block(option) {
         Base.call(this, option);
 
-        // this.componentType = this.constructor.name == 'Block' ? this.constructor.name : 'Block';
-
         this.borderWidth = option.borderWidth == undefined ? '1px' : option.borderWidth;
         this.borderStyle = option.borderStyle == undefined ? 'solid' : option.borderStyle;
         this.borderColor = option.borderColor == undefined ? '#ccc' : option.borderColor;
@@ -308,38 +306,28 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
     var exportCode = function () {
         var _reformTree = {_css_: []};
 
-        // 前序遍历所有节点生成子树和css
-        _preOrder('_root_', _reformTree, function (id, obj) {
+        // 后序遍历所有节点生成子树和css
+        _postOrder('_root_', _reformTree, function (id) {
             var parent = _domTree.dom[id].parent,
                 reform = parent != -1 ? _domTree.dom[id].data.reform() : {html: $('<div id="canvas"></div>'), css: ''};
 
-            if (parent == -1) {// 画布根节点
-                obj._root_ = reform.html;
-            } else if (parent === '_root_') {// 根节点下的子节点
-                obj[id] = reform.html;
-            } else {// 子节点下面的子节点
-                obj[parent] = obj[parent].append(reform.html);
+            this[id] = reform.html;
+
+            var firstChild = _domTree.dom[id].firstChild;
+            while (firstChild !== null) {
+                this[id] = this[id].append(this[firstChild.child]);
+                firstChild = firstChild.next;
             }
 
-            // 生成css
-            obj._css_.push(reform.css);
+            this._css_ = reform.css + this._css_;
         });
-
-        // 遍历根节点下的子树生成html
-        var firstChild = _domTree.dom._root_.firstChild;
-        while (firstChild !== null) {
-            _reformTree._root_.append(_reformTree[firstChild.child]);
-            delete _reformTree[firstChild.child];
-
-            firstChild = firstChild.next;
-        }
 
         console.log(_reformTree._root_[0]);
 
         return {
             html: _reformTree._root_[0].innerHTML,
-            css: _reformTree._css_.join(''),
-            file: _htmlFrame(_reformTree._root_[0].innerHTML, _reformTree._css_.join('')),
+            css: _reformTree._css_,
+            file: _htmlFrame(_reformTree._root_[0].innerHTML, _reformTree._css_),
         };
     };
 
@@ -398,8 +386,8 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
 
         // 遍历要删除dom的ID
         var _arr = [];
-        _preOrder(id, _arr, function (id, obj) {
-            Array.prototype.push.call(obj, id);
+        _preOrder(id, _arr, function (id) {
+            Array.prototype.push.call(this, id);
         });
         _arr.forEach(function (element) {
             delete _domTree.dom[element];// 只删除的当前元素，应该包括其下的所有子元素
@@ -411,33 +399,12 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
     /**
      * 前序遍历
      * @param id
-     * @param arr
-     * @private
-     */
-    var _preOrderBack = function (id, arr) {
-        arr.push(_domTree.dom[id].data);
-
-        var firstChild = _domTree.dom[id].firstChild;
-        if (firstChild !== null) {
-            _preOrder(firstChild.child, arr);
-
-            while (firstChild.next !== null) {
-                _preOrder(firstChild.next.child, arr);
-
-                firstChild = firstChild.next;
-            }
-        }
-    };
-
-    /**
-     * 前序遍历
-     * @param id
      * @param obj
      * @param callback
      * @private
      */
     var _preOrder = function (id, obj, callback) {
-        callback(id, obj);
+        callback.apply(obj, [id]);
 
         var firstChild = _domTree.dom[id].firstChild;
         if (firstChild !== null) {
@@ -448,6 +415,29 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
 
                 firstChild = firstChild.next;
             }
+        }
+    };
+
+    /**
+     * 后序遍历
+     * @param id
+     * @param obj
+     * @param callback
+     * @private
+     */
+    var _postOrder = function (id, obj, callback) {
+        var firstChild = _domTree.dom[id].firstChild;
+        if (firstChild !== null) {
+            _postOrder(firstChild.child, obj, callback);
+
+            while (firstChild.next !== null) {
+                _postOrder(firstChild.next.child, obj, callback);
+                firstChild = firstChild.next;
+            }
+
+            callback.apply(obj, [id]);
+        } else {
+            callback.apply(obj, [id]);
         }
     };
 
