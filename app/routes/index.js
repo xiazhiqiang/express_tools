@@ -19,39 +19,53 @@ router.get('/edit', function (req, res, next) {
 var exportDir = __dirname + '/../../export';// 导出目录
 router.post('/export', function (req, res, next) {
     // console.log(req.body);
-    // TODO 待优化
-    var writeFile = function () {
-        // 写html文件
-        fs.writeFile([exportDir, 'export.html'].join('/'), req.body.file, 'utf8', function (err) {
+
+    // promise a+方式
+    var promise = function (dir) {
+        return new Promise(function (resolve, reject) {
+            fs.exists(exportDir, function (exists) {
+                if (exists) {
+                    resolve({dir: dir, fileContent: req.body.file});
+                } else {
+                    // 创建目录
+                    fs.mkdir(dir, 0777, function (err) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve({dir: dir, fileContent: req.body.file});
+                        }
+                    });
+                }
+            });
+        });
+    }(exportDir);
+
+    promise.then(function (params) {
+        var filePath = [params.dir, 'export.html'].join('/');
+
+        return new Promise(function (resolve, reject) {
+            // 写html文件
+            fs.writeFile(filePath, params.fileContent, 'utf8', function (err) {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve(filePath);
+            });
+        });
+    }).then(function (filePath) {
+        // 下载文件
+        res.download(filePath, 'export.html', function (err) {
             if (err) {
                 throw err;
             }
 
-            // 下载文件
-            res.download([exportDir, 'export.html'].join('/'), 'export.html', function (err) {
-                if (err) {
-                    throw err;
-                }
-
-                console.log('下载成功！');
-            });
+            console.log('下载成功！');
         });
-    };
-
-    // 创建目录
-    fs.exists(exportDir, function (exists) {
-        if (exists) {
-            writeFile();
-        } else {
-            fs.mkdir(exportDir, 0777, function (err) {
-                if (err) {
-                    throw err;
-                }
-
-                writeFile();
-            })
-        }
+    }).catch(function (err) {
+        console.error(err);
     });
+
 });
 
 module.exports = router;

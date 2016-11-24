@@ -228,7 +228,7 @@ define(['jquery', 'helper', 'jqueryui'], function ($, Helper) {
             switch (type) {
                 case 'block':
                     component = new Block({
-                        id: Helper.randomChar(6),
+                        id: Helper.randomChar(1, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') + Helper.randomChar(5),// css命名规范，首字母不要用数字
                         position: data.position || 'absolute',
                         width: data.width || '200px',
                         height: data.height || '100px',
