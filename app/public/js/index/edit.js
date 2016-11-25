@@ -1,5 +1,5 @@
 var callback = function () {
-    requirejs(['jquery', 'jqueryui', 'colorpicker', 'index/m_edit', 'helper'], function ($, jqueryui, colorpicker, Model, Helper) {
+    requirejs(['jquery', 'jqueryui', 'colorpicker', 'index/m_tree', 'index/m_component', 'helper'], function ($, jqueryui, colorpicker, Tree, Component, Helper) {
 
         /**
          * 编辑器Controller
@@ -20,7 +20,7 @@ var callback = function () {
 
             var value = 'undefined',
                 dom = element[0],
-                domData = Model.getCurDom().data;
+                domData = Tree.getCurDom().data;
 
             switch ($(this).data('item')) {
                 // 自适应特殊处理
@@ -86,7 +86,7 @@ var callback = function () {
             }
 
             if (domData.id) {
-                Model.updateDomData(domData.id, domData);
+                Tree.updateDomData(domData.id, domData);
             }
         };
 
@@ -101,7 +101,7 @@ var callback = function () {
 
             var css = {},
                 value = $.trim(element.val()),
-                domData = Model.getCurDom().data;
+                domData = Tree.getCurDom().data;
             switch (element.data('item')) {
                 // 自适应特殊处理
                 case 'self-adaption':
@@ -166,7 +166,7 @@ var callback = function () {
             }
 
             if (domData.id) {
-                Model.updateDomData(domData.id, domData);
+                Tree.updateDomData(domData.id, domData);
             }
         };
 
@@ -179,11 +179,11 @@ var callback = function () {
         var _componentDelete = function (event) {
             event.stopPropagation();
 
-            Model.deleteDom($(this).attr('id'));
-            Model.setCurDomId('');
+            Tree.deleteDom($(this).attr('id'));
+            Tree.setCurDomId('');
             $(this).remove();
 
-            console.log(Model.getDomTree());
+            console.log(Tree.getDomTree());
         };
 
         /**
@@ -201,13 +201,17 @@ var callback = function () {
             return Math.max.apply(Math, zIndex);
         };
 
-        // 控制器入口
-        EditController.init = function () {
+        /**
+         * 初始化事件
+         * @private
+         */
+        var _initEvent = function () {
             // 属性区域操作
             $('.attr-item')
                 .on('attr_update', _attrUpdateCallback)
                 .on('change', function (event) {
-                    _currentElementId = Model.getCurDomId();
+                    event.stopPropagation();
+                    _currentElementId = Tree.getCurDomId();
 
                     if (!_currentElementId) {
                         return false;
@@ -236,7 +240,7 @@ var callback = function () {
                 var type = $(this).data('item'),
                     zIndex = _getMaxZIndex() + 1;
 
-                Model
+                Component
                     .createComponent(type, {zIndex: zIndex})
                     .render('.canvas', {
                         elementUpdateCallback: _elementUpdateCallback,
@@ -260,7 +264,7 @@ var callback = function () {
 
                     $('.attr-item').trigger('attr_update', [ui.helper]);
 
-                    console.log(Model.moveDom(ui.helper[0].id, '_root_'));
+                    console.log(Tree.moveDom(ui.helper[0].id, '_root_'));
                 },
             });
 
@@ -268,7 +272,7 @@ var callback = function () {
             $('.export').on('click', function (event) {
                 event.stopPropagation();
 
-                var code = Model.exportCode();
+                var code = Tree.exportCode();
                 console.log(code);
 
                 var form = $('<form method="post" action="/export"></form>')
@@ -300,13 +304,17 @@ var callback = function () {
                 onSubmit: function (hsb, hex, rgb, element) {
                     $(element).val('#' + hex).ColorPickerHide();
 
-                    _currentElementId = Model.getCurDomId();
+                    _currentElementId = Tree.getCurDomId();
                     if (_currentElementId) {
                         $('#' + _currentElementId).trigger('element_update', [$(element)]);
                     }
                 }
             });
+        };
 
+        // 控制器入口
+        EditController.init = function () {
+            _initEvent();
         }();
     });
 };
