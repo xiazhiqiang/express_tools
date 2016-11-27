@@ -1,4 +1,4 @@
-define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, Helper, Tree) {
+define(['jquery', 'jqueryui', 'helper'], function ($, jqueryui, Helper) {
 
     /**
      * 组件基类
@@ -7,7 +7,6 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
      */
     function Base(option) {
         this.css = {};
-
         this.css.id = option.id;
         this.css.position = option.position == undefined ? 0 : option.position;
         this.css.left = option.left == undefined ? 0 : option.left;
@@ -48,6 +47,8 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
     function Block(option) {
         Base.call(this, option);
 
+        this.type = 'block';
+
         this.css.borderWidth = option.borderWidth == undefined ? '1px' : option.borderWidth;
         this.css.borderStyle = option.borderStyle == undefined ? 'solid' : option.borderStyle;
         this.css.borderColor = option.borderColor == undefined ? '#ccc' : option.borderColor;
@@ -64,10 +65,10 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
 
     /**
      * 区块组件渲染
-     * @param parent
      * @param data
+     * @returns {*|jQuery|HTMLElement}
      */
-    Block.prototype.render = function (parent, data) {
+    Block.prototype.render = function (data) {
         data = data || {};
 
         var that = this,
@@ -96,7 +97,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
         wrapper
             .append(deleter)
             .css(css)
-            .data('parent', $(parent).attr('id'))
+            .data('parent', data.parent)
             .on('mousedown', function (event) {
                 event.stopPropagation();
 
@@ -104,9 +105,6 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
                 $('.component').removeClass('focus');
                 $('.component .component-delete').addClass('hide');
                 $(this).addClass('focus').children('.component-delete').removeClass('hide');
-
-                // 设置当前domTree中被选中的domId
-                Tree.setCurDomId(that.css.id);
 
                 // 触发更新属性事件
                 $('.attr-item').trigger('attr_update', [$(this)]);
@@ -133,22 +131,20 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
                     }
                     ui.helper.appendTo($(this));
 
+                    // 属性区属性值更新
                     $('.attr-item').trigger('attr_update', [ui.helper]);
 
-                    console.log(Tree.moveDom(ui.helper[0].id, parent));
+                    // 画布元素移动
+                    $('.canvas').trigger('moveDom', [ui.helper[0].id, parent]);
                 }
             })
             .resizable({
                 resize: function (event, ui) {
                     $('.attr-item').trigger('attr_update', [ui.helper]);
                 }
-            })
-            .appendTo(parent);
+            });
 
-        // 添加到dom树
-        console.log(Tree.addDomTree(this));
-
-        return this;
+        return wrapper;
     };
 
     /**
@@ -215,6 +211,16 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
     Image.prototype = Object.create(Base.prototype);
     Image.prototype.constructor = Image;
 
+
+    /**
+     * 生成组件ID，符合css规范
+     * @returns {string}
+     * @private
+     */
+    var _createComponentId = function () {
+        return Helper.randomChar(1, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') + Helper.randomChar(5);// css命名规范，首字母不要用数字
+    };
+
     /**
      * 生成组件对象，工厂模式
      * @type {{block: Component.block, text: Component.text, image: Component.image, factory: Component.factory}}
@@ -222,7 +228,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
     var Component = {
         block: function (data) {
             data = $.extend({
-                id: Helper.randomChar(1, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') + Helper.randomChar(5),// css命名规范，首字母不要用数字
+                id: _createComponentId(),
                 position: data.position || 'absolute',
                 width: data.width || '200px',
                 height: data.height || '100px',

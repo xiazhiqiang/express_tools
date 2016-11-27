@@ -18,6 +18,9 @@ var callback = function () {
         var _attrUpdateCallback = function (event, element) {
             event.stopPropagation();
 
+            // 设置当前domTree中被选中的domId
+            Tree.setCurDomId(element.attr('id'));
+
             var value = 'undefined',
                 dom = element[0],
                 cssData = Tree.getCurDom().data.css;
@@ -86,7 +89,7 @@ var callback = function () {
             }
 
             if (cssData.id) {
-                Tree.updateDomData(cssData.id, cssData);
+                Tree.updateDomData(cssData.id, 'css', cssData);
             }
         };
 
@@ -166,14 +169,13 @@ var callback = function () {
             }
 
             if (cssData.id) {
-                Tree.updateDomData(cssData.id, cssData);
+                Tree.updateDomData(cssData.id, 'css', cssData);
             }
         };
 
         /**
          * 删除视图区组件回调函数
          * @param event
-         * @param element
          * @private
          */
         var _componentDelete = function (event) {
@@ -229,6 +231,9 @@ var callback = function () {
                                 $('.position-top').val('0px').trigger('change');
                             }
                             break;
+
+                        default:
+                            break;
                     }
 
                     // 属性区改变同时作用于当前选中元素在视图区的显示
@@ -237,15 +242,21 @@ var callback = function () {
 
             // 添加组件到视图区
             $('.component-menu li').on('click', 'a', function () {
-                var type = $(this).data('item'),
-                    zIndex = _getMaxZIndex() + 1;
+                var parent = 'canvas',
+                    type = $(this).data('item'),
+                    zIndex = _getMaxZIndex() + 1,
+                    component = Component.createComponent(type, {zIndex: zIndex});
 
-                Component
-                    .createComponent(type, {zIndex: zIndex})
-                    .render('.canvas', {
+                component
+                    .render({
                         elementUpdateCallback: _elementUpdateCallback,
                         componentDelete: _componentDelete,
-                    });
+                        parent: parent
+                    })
+                    .appendTo('#' + parent);
+
+                // 添加到dom树
+                console.log(Tree.addDomTree(component));
             });
 
             // 画布区域绑定droppable事件
@@ -264,8 +275,11 @@ var callback = function () {
 
                     $('.attr-item').trigger('attr_update', [ui.helper]);
 
-                    console.log(Tree.moveDom(ui.helper[0].id, '_root_'));
-                },
+                    $(this).trigger('moveDom', [ui.helper[0].id, '_root_']);
+                }
+            }).on('moveDom', function (event, currentId, parentId) {
+                event.stopPropagation();
+                console.log(Tree.moveDom(currentId, parentId));
             });
 
             // 导出按钮
@@ -280,6 +294,15 @@ var callback = function () {
                     .append($('<input type="hidden" name="css">').val(code.css))
                     .append($('<input type="hidden" name="file">').val(code.file));
                 form.submit();
+            });
+
+            // 保存数据
+            $('.save').on('click', function (event) {
+                event.stopPropagation();
+                var treeData = Tree.getTreeData();
+
+                // TODO 将数据写入数据库
+                sessionStorage.setItem('treeData', JSON.stringify(treeData));
             });
 
             /**
@@ -312,8 +335,39 @@ var callback = function () {
             });
         };
 
+        /**
+         * 加载已经保存的视图区域dom
+         * @private
+         */
+        var _initDom = function () {
+            // TODO 从数据表中获取
+            var treeData = JSON.parse(sessionStorage.getItem('treeData')),
+                domArr = Tree.initDomTree(treeData),
+                reformTree = {};
+
+            domArr.forEach(function (element) {
+                if (element.parent != -1) {
+                    reformTree[element.data.css.id] = element.data.render({
+                        elementUpdateCallback: _elementUpdateCallback,
+                        componentDelete: _componentDelete,
+                        parent: element.parent == treeData.root ? 'canvas' : element.parent
+                    });
+                } else {
+                    reformTree[treeData.root] = $('#canvas');
+                }
+
+                var firstChild = element.firstChild;
+                while (firstChild !== null) {
+                    var index = element.parent != -1 ? element.data.css.id : treeData.root;
+                    reformTree[index] = reformTree[index].append(reformTree[firstChild.child]);
+                    firstChild = firstChild.next;
+                }
+            });
+        };
+
         // 控制器入口
         EditController.init = function () {
+            _initDom();
             _initEvent();
         }();
     });

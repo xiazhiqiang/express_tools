@@ -1,45 +1,64 @@
-define(['jquery'], function ($) {
+define(['jquery', 'index/m_component'], function ($, Component) {
 
     /**
      * 画布的组件dom树
-     * @type {{firstHead: string, dom: {_root_: {parent: number, firstChild: null, rightSib: null, data: null}}, current: string}}
      * @private
      */
-    var _domTree = {
-        firstHead: '_root_',
-        dom: {// 采用双亲、孩子和兄弟表示法做dom树
-            '_root_': {
-                parent: -1,
-                firstChild: null,
-                data: null
-            }// 根节点
-        },
-        current: ''
+    var _domTree = {};
+
+    //------------------------------操作dom树相关--------------------------------
+    /**
+     * 获取dom树数据
+     * @returns {{root: string, dom: {}, current: string}}
+     */
+    var getTreeData = function () {
+        var treeData = {
+            root: _domTree.root,
+            dom: {},
+            current: _domTree.current
+        };
+
+        _preOrder(_domTree.root, treeData, function (id) {
+            this.dom[id] = {
+                parent: _domTree.dom[id].parent,
+                firstChild: _domTree.dom[id].firstChild,
+                data: _domTree.dom[id].data ? {css: _domTree.dom[id].data.css, type: _domTree.dom[id].data.type} : null
+            };
+        });
+
+        return treeData;
     };
 
     /**
-     * 导出html框架
-     * @param html
-     * @param css
-     * @returns {string}
-     * @private
+     * 初始化dom树
+     * @param data
+     * @returns {Array}
      */
-    var _htmlFrame = function (html, css) {
-        html = html || '';
-        css = css || '';
+    var initDomTree = function (data) {
+        _domTree = data || {
+                root: '_root_',
+                dom: {// 采用双亲、孩子和兄弟表示法做dom树
+                    '_root_': {
+                        parent: -1,
+                        firstChild: null,
+                        data: null
+                    }// 根节点
+                },
+                current: ''
+            };
 
-        return [
-            '<!DOCTYPE html><html>',
-            '<head>',
-            '<meta charset="utf-8">',
-            '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
-            '<title>Demo</title>',
-            css ? '<style type="text/css">' + css + '</style>' : css,
-            '</head><body>',
-            html,
-            '</body></html>'
-        ].join('');
+        var domArr = [];
+        _postOrder(_domTree.root, domArr, function (id) {
+            if (_domTree.dom[id].data !== null) {
+                _domTree.dom[id].data = Component.createComponent(_domTree.dom[id].data.type, _domTree.dom[id].data.css);
+            }
+
+            domArr.push(_domTree.dom[id]);
+        });
+
+        return domArr;
     };
+
 
     /**
      * 导出html,css代码
@@ -136,6 +155,30 @@ define(['jquery'], function ($) {
         });
 
         return _domTree.dom;
+    };
+
+    /**
+     * 导出html框架
+     * @param html
+     * @param css
+     * @returns {string}
+     * @private
+     */
+    var _htmlFrame = function (html, css) {
+        html = html || '';
+        css = css || '';
+
+        return [
+            '<!DOCTYPE html><html>',
+            '<head>',
+            '<meta charset="utf-8">',
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
+            '<title>Demo</title>',
+            css ? '<style type="text/css">' + css + '</style>' : css,
+            '</head><body>',
+            html,
+            '</body></html>'
+        ].join('');
     };
 
     /**
@@ -244,15 +287,21 @@ define(['jquery'], function ($) {
         }
     };
 
+    //------------------------------操作属性相关--------------------------------
     /**
      * 更新dom树数据
      * @param id
-     * @param data
+     * @param name
+     * @param value
      * @returns {*}
      */
-    var updateDomData = function (id, data) {
+    var updateDomData = function (id, name, value) {
         if (_domTree.dom[id]) {
-            _domTree.dom[id].data = $.extend(_domTree.dom[id].data, data);
+            if (name) {
+                _domTree.dom[id].data[name] = $.extend(_domTree.dom[id].data[name], value);
+            } else {
+                _domTree.dom[id].data = $.extend(_domTree.dom[id].data, value);
+            }
 
             return _domTree.dom[id];
         }
@@ -310,6 +359,8 @@ define(['jquery'], function ($) {
         addDomTree: addDomTree,
         updateDomData: updateDomData,
         exportCode: exportCode,
+        getTreeData: getTreeData,
+        initDomTree: initDomTree,
 
 
         getDom: getDom,
