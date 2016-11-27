@@ -20,61 +20,61 @@ var callback = function () {
 
             var value = 'undefined',
                 dom = element[0],
-                domData = Tree.getCurDom().data;
+                cssData = Tree.getCurDom().data.css;
 
             switch ($(this).data('item')) {
                 // 自适应特殊处理
                 case 'self-adaption':
-                    domData.margin = dom.style.margin;
+                    cssData.margin = dom.style.margin;
                     $(this)[0].checked = dom.style.margin != '0px';
                     break;
 
                 // 基础属性
                 case 'position':
-                    domData.position = value = dom.style.position;
+                    cssData.position = value = dom.style.position;
                     break;
                 case 'position-left':
-                    domData.left = value = dom.style.left;
+                    cssData.left = value = dom.style.left;
                     break;
                 case 'position-top':
-                    domData.top = value = dom.style.top;
+                    cssData.top = value = dom.style.top;
                     break;
                 case 'position-zIndex':
-                    domData.zIndex = value = dom.style.zIndex;
+                    cssData.zIndex = value = dom.style.zIndex;
                     break;
                 case 'size-width':
-                    domData.width = value = dom.style.width;
+                    cssData.width = value = dom.style.width;
                     break;
                 case 'size-height':
-                    domData.height = value = dom.style.height;
+                    cssData.height = value = dom.style.height;
                     break;
 
                 // 边框属性
                 case 'border-width':
-                    domData.borderWidth = value = dom.style.borderWidth;
+                    cssData.borderWidth = value = dom.style.borderWidth;
                     break;
                 case 'border-style':
-                    domData.borderStyle = value = dom.style.borderStyle;
+                    cssData.borderStyle = value = dom.style.borderStyle;
                     break;
                 case 'border-color':
-                    domData.borderColor = value = Helper.rgb2hex(dom.style.borderColor);
+                    cssData.borderColor = value = Helper.rgb2hex(dom.style.borderColor);
                     break;
 
                 // 背景属性
                 case 'background-position':
-                    domData.backgroundPosition = value = dom.style.backgroundPosition;
+                    cssData.backgroundPosition = value = dom.style.backgroundPosition;
                     break;
                 case 'background-image':
-                    domData.backgroundImage = value = dom.style.backgroundImage.slice(5, -2);
+                    cssData.backgroundImage = value = dom.style.backgroundImage.slice(5, -2);
                     break;
                 case 'background-color':
-                    domData.backgroundColor = value = Helper.rgb2hex(dom.style.backgroundColor);
+                    cssData.backgroundColor = value = Helper.rgb2hex(dom.style.backgroundColor);
                     break;
                 case 'background-repeat':
-                    domData.backgroundRepeat = value = dom.style.backgroundRepeat;
+                    cssData.backgroundRepeat = value = dom.style.backgroundRepeat;
                     break;
                 case 'background-size':
-                    domData.backgroundSize = value = dom.style.backgroundSize == 'initial' ? '' : dom.style.backgroundSize;
+                    cssData.backgroundSize = value = dom.style.backgroundSize == 'initial' ? '' : dom.style.backgroundSize;
                     break;
 
                 default:
@@ -85,8 +85,8 @@ var callback = function () {
                 $(this).val(value);
             }
 
-            if (domData.id) {
-                Tree.updateDomData(domData.id, domData);
+            if (cssData.id) {
+                Tree.updateDomData(cssData.id, cssData);
             }
         };
 
@@ -101,60 +101,60 @@ var callback = function () {
 
             var css = {},
                 value = $.trim(element.val()),
-                domData = Tree.getCurDom().data;
+                cssData = Tree.getCurDom().data.css;
             switch (element.data('item')) {
                 // 自适应特殊处理
                 case 'self-adaption':
-                    domData.margin = css.margin = element[0].checked ? '0 auto' : '0';
+                    cssData.margin = css.margin = element[0].checked ? '0 auto' : '0';
                     break;
 
                 // 基础属性
                 case 'position':
-                    domData.position = css.position = value;
+                    cssData.position = css.position = value;
                     break;
                 case 'position-left':
-                    domData.left = css.left = value;
+                    cssData.left = css.left = value;
                     break;
                 case 'position-top':
-                    domData.top = css.top = value;
+                    cssData.top = css.top = value;
                     break;
                 case 'position-zIndex':
-                    domData.zIndex = css['z-index'] = value;
+                    cssData.zIndex = css['z-index'] = value;
                     break;
                 case 'size-width':
-                    domData.width = css.width = value;
+                    cssData.width = css.width = value;
                     break;
                 case 'size-height':
-                    domData.height = css.height = value;
+                    cssData.height = css.height = value;
                     break;
 
                 // 边框属性
                 case 'border-width':
-                    domData.borderWidth = css['border-width'] = value;
+                    cssData.borderWidth = css['border-width'] = value;
                     break;
                 case 'border-style':
-                    domData.borderStyle = css['border-style'] = value;
+                    cssData.borderStyle = css['border-style'] = value;
                     break;
                 case 'border-color':
-                    domData.borderColor = css['border-color'] = value;
+                    cssData.borderColor = css['border-color'] = value;
                     break;
 
                 // 背景属性
                 case 'background-position':
-                    domData.backgroundPosition = css['background-position'] = value;
+                    cssData.backgroundPosition = css['background-position'] = value;
                     break;
                 case 'background-image':
-                    domData.backgroundImage = value;
+                    cssData.backgroundImage = value;
                     css['background-image'] = 'url(' + value + ')';
                     break;
                 case 'background-color':
-                    domData.backgroundColor = css['background-color'] = value;
+                    cssData.backgroundColor = css['background-color'] = value;
                     break;
                 case 'background-repeat':
-                    domData.backgroundRepeat = css['background-repeat'] = value;
+                    cssData.backgroundRepeat = css['background-repeat'] = value;
                     break;
                 case 'background-size':
-                    domData.backgroundSize = css['background-size'] = value;
+                    cssData.backgroundSize = css['background-size'] = value;
                     break;
 
                 default:
@@ -165,8 +165,8 @@ var callback = function () {
                 $(this).css(css);
             }
 
-            if (domData.id) {
-                Tree.updateDomData(domData.id, domData);
+            if (cssData.id) {
+                Tree.updateDomData(cssData.id, cssData);
             }
         };
 

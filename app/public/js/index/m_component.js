@@ -6,15 +6,17 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
      * @constructor
      */
     function Base(option) {
-        this.id = option.id == undefined ? Helper.randomChar(6) : option.id;
-        this.position = option.position == undefined ? 0 : option.position;
-        this.left = option.left == undefined ? 0 : option.left;
-        this.top = option.top == undefined ? 0 : option.top;
-        this.width = option.width == undefined ? 0 : option.width;
-        this.height = option.height == undefined ? 0 : option.height;
-        this.zIndex = option.zIndex == undefined ? 1000 : option.zIndex;
-        this.margin = option.margin == undefined ? 0 : option.margin;
-        this.padding = option.padding == undefined ? 0 : option.padding;
+        this.css = {};
+
+        this.css.id = option.id;
+        this.css.position = option.position == undefined ? 0 : option.position;
+        this.css.left = option.left == undefined ? 0 : option.left;
+        this.css.top = option.top == undefined ? 0 : option.top;
+        this.css.width = option.width == undefined ? 0 : option.width;
+        this.css.height = option.height == undefined ? 0 : option.height;
+        this.css.zIndex = option.zIndex == undefined ? 1000 : option.zIndex;
+        this.css.margin = option.margin == undefined ? 0 : option.margin;
+        this.css.padding = option.padding == undefined ? 0 : option.padding;
     }
 
     Base.prototype.render = function (parent, dom) {
@@ -46,15 +48,15 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
     function Block(option) {
         Base.call(this, option);
 
-        this.borderWidth = option.borderWidth == undefined ? '1px' : option.borderWidth;
-        this.borderStyle = option.borderStyle == undefined ? 'solid' : option.borderStyle;
-        this.borderColor = option.borderColor == undefined ? '#ccc' : option.borderColor;
+        this.css.borderWidth = option.borderWidth == undefined ? '1px' : option.borderWidth;
+        this.css.borderStyle = option.borderStyle == undefined ? 'solid' : option.borderStyle;
+        this.css.borderColor = option.borderColor == undefined ? '#ccc' : option.borderColor;
 
-        this.backgroundPosition = option.backgroundPosition == undefined ? '0 0' : option.backgroundPosition;
-        this.backgroundImage = option.backgroundImage == undefined ? '' : option.backgroundImage;
-        this.backgroundColor = option.backgroundColor == undefined ? '#ffffff' : option.backgroundColor;
-        this.backgroundRepeat = option.backgroundRepeat == undefined ? 'repeat' : option.backgroundRepeat;
-        this.backgroundSize = option.backgroundSize == undefined ? '' : option.backgroundSize;
+        this.css.backgroundPosition = option.backgroundPosition == undefined ? '0 0' : option.backgroundPosition;
+        this.css.backgroundImage = option.backgroundImage == undefined ? '' : option.backgroundImage;
+        this.css.backgroundColor = option.backgroundColor == undefined ? '#ffffff' : option.backgroundColor;
+        this.css.backgroundRepeat = option.backgroundRepeat == undefined ? 'repeat' : option.backgroundRepeat;
+        this.css.backgroundSize = option.backgroundSize == undefined ? '' : option.backgroundSize;
     }
 
     Block.prototype = Object.create(Base.prototype);
@@ -70,18 +72,18 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
 
         var that = this,
             deleter = $('<a href="javascript:;" class="component-delete hide"></a>'),
-            wrapper = $('<div class="component" id="' + that.id + '"></div>'),
+            wrapper = $('<div class="component" id="' + that.css.id + '"></div>'),
             css = $.extend({
-                position: that.position,
-                left: that.left,
-                top: that.top,
-                'z-index': that.zIndex,
-                width: that.width,
-                height: that.height,
-                margin: that.margin,
-                padding: that.padding,
-                background: [that.backgroundColor, 'url(' + that.backgroundImage + ')', that.backgroundPosition, that.backgroundRepeat, that.backgroundSize].join(' '),
-                border: [that.borderWidth, that.borderStyle, that.borderColor].join(' ')
+                position: that.css.position,
+                left: that.css.left,
+                top: that.css.top,
+                'z-index': that.css.zIndex,
+                width: that.css.width,
+                height: that.css.height,
+                margin: that.css.margin,
+                padding: that.css.padding,
+                background: [that.css.backgroundColor, 'url(' + that.css.backgroundImage + ')', that.css.backgroundPosition, that.css.backgroundRepeat, that.css.backgroundSize].join(' '),
+                border: [that.css.borderWidth, that.css.borderStyle, that.css.borderColor].join(' ')
             }, data.css || {});
 
         // 组件删除按钮点击
@@ -104,7 +106,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
                 $(this).addClass('focus').children('.component-delete').removeClass('hide');
 
                 // 设置当前domTree中被选中的domId
-                Tree.setCurDomId(that.id);
+                Tree.setCurDomId(that.css.id);
 
                 // 触发更新属性事件
                 $('.attr-item').trigger('attr_update', [$(this)]);
@@ -155,7 +157,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
      */
     Block.prototype.reform = function () {
         return {
-            html: $('<div id="' + this.id + '"></div>'),
+            html: $('<div id="' + this.css.id + '"></div>'),
             css: this.createCss()
         };
     };
@@ -166,7 +168,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
      */
     Block.prototype.createCss = function () {
         var css = [
-            '#' + this.id + '{',
+            '#' + this.css.id + '{',
             this.createCssAttr('position'),
             this.createCssAttr('left'),
             this.createCssAttr('top'),
@@ -249,7 +251,7 @@ define(['jquery', 'jqueryui', 'helper', 'index/m_tree'], function ($, jqueryui, 
         },
         factory: function (type, data) {
             try {
-                type = String.prototype.toLocaleLowerCase.apply(type);
+                type = type.toLowerCase();
 
                 return Component[type](data);
             } catch (e) {

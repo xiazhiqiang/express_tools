@@ -11,7 +11,6 @@ define(['jquery'], function ($) {
             '_root_': {
                 parent: -1,
                 firstChild: null,
-                rightSib: null,
                 data: null
             }// 根节点
         },
@@ -81,14 +80,14 @@ define(['jquery'], function ($) {
      */
     var addDomTree = function (data) {
         // 添加dom
-        _domTree.dom[data.id] = {
+        _domTree.dom[data.css.id] = {
             parent: '_root_',
             firstChild: null,
             data: data
         };
 
         // 追加树关系
-        _appendRelation(data.id, '_root_');
+        _appendRelation(data.css.id, '_root_');
 
         return _domTree.dom;
     };
