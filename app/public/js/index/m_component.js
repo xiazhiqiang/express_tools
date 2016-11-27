@@ -36,7 +36,7 @@ define(['jquery', 'jqueryui', 'helper'], function ($, jqueryui, Helper) {
         value_prefix = value_prefix || '';
         value_suffix = value_suffix || '';
 
-        return this[name] != undefined && this[name] != '' ? [attr, ':', value_prefix, this[name], value_suffix, ';'].join('') : '';
+        return this.css[name] != undefined && this.css[name] != '' ? [attr, ':', value_prefix, this.css[name], value_suffix, ';'].join('') : '';
     };
 
     /**
