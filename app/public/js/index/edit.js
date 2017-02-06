@@ -345,24 +345,26 @@ var callback = function () {
                 domArr = Tree.initDomTree(treeData),
                 reformTree = {};
 
-            domArr.forEach(function (element) {
-                if (element.parent != -1) {
-                    reformTree[element.data.css.id] = element.data.render({
-                        elementUpdateCallback: _elementUpdateCallback,
-                        componentDelete: _componentDelete,
-                        parent: element.parent == treeData.root ? 'canvas' : element.parent
-                    });
-                } else {
-                    reformTree[treeData.root] = $('#canvas');
-                }
+            if (treeData) {
+                domArr.forEach(function (element) {
+                    if (element.parent != -1) {
+                        reformTree[element.data.css.id] = element.data.render({
+                            elementUpdateCallback: _elementUpdateCallback,
+                            componentDelete: _componentDelete,
+                            parent: element.parent == treeData.root ? 'canvas' : element.parent
+                        });
+                    } else {
+                        reformTree[treeData.root] = $('#canvas');
+                    }
 
-                var firstChild = element.firstChild;
-                while (firstChild !== null) {
-                    var index = element.parent != -1 ? element.data.css.id : treeData.root;
-                    reformTree[index] = reformTree[index].append(reformTree[firstChild.child]);
-                    firstChild = firstChild.next;
-                }
-            });
+                    var firstChild = element.firstChild;
+                    while (firstChild !== null) {
+                        var index = element.parent != -1 ? element.data.css.id : treeData.root;
+                        reformTree[index] = reformTree[index].append(reformTree[firstChild.child]);
+                        firstChild = firstChild.next;
+                    }
+                });
+            }
         };
 
         // 控制器入口
